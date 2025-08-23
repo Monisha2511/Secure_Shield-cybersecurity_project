@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SecureShield</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-header {
+            background-color: #1c2129;
+            border-bottom: 1px solid #30363d;
+            padding: 1rem 1.5rem;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 1.5rem;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #3a86ff;
+        }
+        
+        .progress {
+            height: 10px;
+            background-color: #2d333b;
+        }
+        
+        .table {
+            color: white;
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: #1c2129;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-shield-alt me-2"></i>SecureShield
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/learning/cybersecurity-basics">Learning</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <h1 class="mb-4">Security Dashboard</h1>
+
+        <!-- Statistics Cards -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-number">{{ password_analytics.strong }}</div>
+                    <div class="stat-label">Strong Passwords</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-number">{{ password_analytics.medium }}</div>
+                    <div class="stat-label">Medium Passwords</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-number">{{ password_analytics.weak }}</div>
+                    <div class="stat-label">Weak Passwords</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-number">{{ check_history|length }}</div>
+                    <div class="stat-label">Total Checks</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Password Strength Chart -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Password Strength Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="passwordChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Threat Distribution Chart -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Threat Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="threatChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Learning Progress -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Learning Progress</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for course, progress in learning_progress.items() %}
+                        <div class="mb-3">
+                            <h6>{{ course }}</h6>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: {{ progress }}%;" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100">{{ progress }}%</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <a href="/learning/cybersecurity-basics" class="btn btn-primary mt-2">Continue Learning</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Recent Activity</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-borderless">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Tool</th>
+                                        <th>Result</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for check in check_history %}
+                                    <tr>
+                                        <td>{{ check.date }}</td>
+                                        <td>{{ check.tool }}</td>
+                                        <td>
+                                            {% if check.result == 'Strong' or check.result == 'Legitimate' %}
+                                            <span class="badge bg-success">{{ check.result }}</span> {% elif check.result == 'Medium' or check.result == 'Suspicious' %}
+                                            <span class="badge bg-warning">{{ check.result }}</span> {% else %}
+                                            <span class="badge bg-danger">{{ check.result }}</span> {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Password Strength Chart
+        const passwordCtx = document.getElementById('passwordChart').getContext('2d');
+        const passwordChart = new Chart(passwordCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Weak', 'Medium', 'Strong'],
+                datasets: [{
+                    data: [{
+                        {
+                            password_analytics.weak
+                        }
+                    }, {
+                        {
+                            password_analytics.medium
+                        }
+                    }, {
+                        {
+                            password_analytics.strong
+                        }
+                    }],
+                    backgroundColor: [
+                        '#dc3545',
+                        '#ffc107',
+                        '#198754'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: 'white'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Threat Distribution Chart
+        const threatCtx = document.getElementById('threatChart').getContext('2d');
+        const threatChart = new Chart(threatCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Phishing', 'Malware', 'Weak Password', 'Social Engineering'],
+                datasets: [{
+                    data: [{
+                        {
+                            threat_analytics.phishing
+                        }
+                    }, {
+                        {
+                            threat_analytics.malware
+                        }
+                    }, {
+                        {
+                            threat_analytics.weak_password
+                        }
+                    }, {
+                        {
+                            threat_analytics.social_engineering
+                        }
+                    }],
+                    backgroundColor: [
+                        '#dc3545',
+                        '#6610f2',
+                        '#fd7e14',
+                        '#20c997'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: 'white'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
