@@ -731,6 +731,7 @@
                         <a href="https://www.amazon.com/Social-Engineering-Science-Human-Hacking/dp/111943338X" class="textbook-link" target="_blank">
                             <i class="fas fa-book me-2"></i>Social Engineering: The Science of Human Hacking
                         </a>
+                        
 
                         <button class="btn btn-primary mt-3" onclick="startLearning('Phishing Awareness')">Start Learning</button>
                     </div>
@@ -753,6 +754,7 @@
                         </a>
 
                         <button class="btn btn-primary mt-3" onclick="startLearning('Password Management')">Start Learning</button>
+                        
                     </div>
                 </div>
             </div>
@@ -1102,38 +1104,17 @@
         }
 
         // Start learning function
-        function startLearning(course) {
-            // In a real app, you might have user authentication
-            // For now, we'll use a simple user identifier
-            const userIdentifier = localStorage.getItem('user_id') || 'anonymous';
+       
+  // Start Learning function for static hosting (GitHub Pages)
+  function startLearning(course) {
+      // Optional: store user info locally (if needed)
+      const userIdentifier = localStorage.getItem('user_id') || 'anonymous';
+      localStorage.setItem('last_course', course);
 
-            fetch('/api/learning/start', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        course_name: course,
-                        user_id: userIdentifier
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        showToast('Error', data.error, 'error');
-                    } else {
-                        showToast('Success', data.message, 'success');
-                        // Redirect to learning page
-                        if (data.redirect_url) {
-                            window.location.href = data.redirect_url;
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showToast('Error', 'Failed to start course. Please try again.', 'error');
-                });
-        }
+      // Redirect to learning.html with course name as a URL parameter
+      window.location.href = "learning.html?course=" + encodeURIComponent(course);
+  }
+
 
         // Newsletter subscription
         function subscribeNewsletter() {
