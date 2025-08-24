@@ -40,6 +40,9 @@
       </div>
       <small id="progressText" class="mt-1 d-block">0% Complete</small>
     </div>
+    <!-- Toast container -->
+<div id="toastContainer" style="position: fixed; top: 1rem; right: 1rem; z-index: 1055;"></div>
+
 
     <div class="course-content">
       <div class="alert alert-info">
@@ -161,14 +164,35 @@
       icon.classList.toggle("fa-chevron-down");
       icon.classList.toggle("fa-chevron-up");
     }
+    function showToast(title, message, type = "success", duration = 3000) {
+    const toastId = 'toast-' + Date.now();
+    const colors = { success: 'bg-success', error: 'bg-danger', info: 'bg-info' };
+    const toastHtml = `
+        <div id="${toastId}" class="toast align-items-center text-white ${colors[type] || 'bg-primary'} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <strong>${title}:</strong> ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>`;
+    const container = document.getElementById('toastContainer');
+    container.insertAdjacentHTML('beforeend', toastHtml);
+    const toastEl = document.getElementById(toastId);
+    const bsToast = new bootstrap.Toast(toastEl, { delay: duration });
+    bsToast.show();
+    bsToast._element.addEventListener('hidden.bs.toast', () => toastEl.remove());
+}
+
 
     function completeModule(index) {
-      let progress = JSON.parse(localStorage.getItem(`progress-${courseName}`) || "{}");
-      progress[index] = true;
-      localStorage.setItem(`progress-${courseName}`, JSON.stringify(progress));
-      updateProgress();
-      alert("Module marked complete!");
-    }
+    let progress = JSON.parse(localStorage.getItem(`progress-${courseName}`) || "{}");
+    progress[index] = true;
+    localStorage.setItem(`progress-${courseName}`, JSON.stringify(progress));
+    updateProgress();
+    showToast('Success', 'Module marked complete!', 'success');
+}
+
 
     function updateProgress() {
       const course = courseData[courseName];
@@ -182,7 +206,7 @@
     }
 
     function checkQuiz(btn) {
-      alert("Quiz checked (static demo).");
+      showToast('Info', 'Quiz checked (static demo).', 'info');
     }
   </script>
 
